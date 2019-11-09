@@ -1,10 +1,11 @@
-package simple_server
+package main
 
 import (
 	"context"
 	"go-grpc-example/config"
 	pb "go-grpc-example/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"log"
 	"net"
 )
@@ -18,7 +19,12 @@ func (s *SearchService) Search(ctx context.Context, r *pb.SearchRequest) (*pb.Se
 }
 
 func main() {
-	server := grpc.NewServer()
+	tc, e := credentials.NewServerTLSFromFile(config.ServerPemPath, config.ServerKeyPath)
+	if e != nil {
+		log.Printf("credentials.NewServerTLSFromFile err:%v", e.Error())
+	}
+
+	server := grpc.NewServer(grpc.Creds(tc))
 	pb.RegisterSearchServiceServer(server, &SearchService{})
 
 	listener, e := net.Listen("tcp", config.PORT)
