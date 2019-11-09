@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package proto;
+
+//关键字 stream，声明其为一个流方法
+service StreamService {
+    // 服务器端流 RPC
+    rpc List (ReqStream) returns (stream RespStream) {
+    };
+    // 客户端流  RPC
+    rpc Record (stream ReqStream) returns (RespStream) {
+    };
+    // 双向流 RPC
+    rpc Route (stream ReqStream) returns (stream RespStream) {
+    };
+}
+
+message StreamPoint {
+    string name = 1;
+    int32 value = 2;
+}
+
+message ReqStream {
+    StreamPoint pt = 1;
+}
+
+message RespStream {
+    StreamPoint pt = 1;
+}
