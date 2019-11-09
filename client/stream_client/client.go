@@ -82,5 +82,29 @@ func printRecord(client pb.StreamServiceClient, r *pb.ReqStream) error {
 }
 
 func printRoute(client pb.StreamServiceClient, r *pb.ReqStream) error {
+	routeClient, e := client.Route(context.Background())
+	if e != nil {
+		return nil
+	}
+
+	for n := 0; n < 6; n++ {
+		r.Pt.Value = r.Pt.Value + int32(n)
+		e := routeClient.Send(r)
+		if e != nil {
+			return e
+		}
+
+		respStream, e := routeClient.Recv()
+		if e == io.EOF {
+			return nil
+		}
+		if e != nil {
+			return e
+		}
+
+		log.Printf("接受到服务端发送的内容  pt.name:%v,  pt.value:%d", respStream.Pt.Name, respStream.Pt.Value)
+	}
+
+	routeClient.CloseSend()
 	return nil
 }

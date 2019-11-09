@@ -43,7 +43,31 @@ func (StreamService) Record(stream pb.StreamService_RecordServer) error {
 	return nil
 }
 
-func (StreamService) Route(pb.StreamService_RouteServer) error {
+func (StreamService) Route(stream pb.StreamService_RouteServer) error {
+	n := 0
+	for {
+		e := stream.Send(&pb.RespStream{
+			Pt: &pb.StreamPoint{
+				Name:  "route 服务端 发送的内容",
+				Value: int32(n),
+			},
+		})
+		if e != nil {
+			return e
+		}
+
+		reqStream, e := stream.Recv()
+		if e == io.EOF {
+			return nil
+		}
+		if e != nil {
+			return e
+		}
+
+		n++
+		log.Printf("pt.name:%v,  pt.value:%d", reqStream.Pt.Name, reqStream.Pt.Value)
+	}
+
 	return nil
 }
 
