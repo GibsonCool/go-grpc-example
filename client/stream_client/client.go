@@ -58,6 +58,26 @@ func printLists(client pb.StreamServiceClient, r *pb.ReqStream) error {
 }
 
 func printRecord(client pb.StreamServiceClient, r *pb.ReqStream) error {
+	stream, e := client.Record(context.Background())
+	if e != nil {
+		return e
+	}
+
+	for n := 0; n < 8; n++ {
+		r.Pt.Value = r.Pt.Value + int32(n)
+		e := stream.Send(r)
+		if e != nil {
+			return e
+		}
+	}
+
+	resp, e := stream.CloseAndRecv()
+	if e != nil {
+		return e
+	}
+
+	log.Printf("resp:pt.name:%s,  pt.value:%d", resp.Pt.Name, resp.Pt.Value)
+
 	return nil
 }
 

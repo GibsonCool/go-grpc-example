@@ -4,6 +4,7 @@ import (
 	"go-grpc-example/config"
 	pb "go-grpc-example/proto"
 	"google.golang.org/grpc"
+	"io"
 	"log"
 	"net"
 )
@@ -28,7 +29,17 @@ func (StreamService) List(r *pb.ReqStream, stream pb.StreamService_ListServer) e
 }
 
 func (StreamService) Record(stream pb.StreamService_RecordServer) error {
+	for {
+		reqStream, e := stream.Recv()
+		if e == io.EOF {
+			return stream.SendAndClose(&pb.RespStream{Pt: &pb.StreamPoint{Name: "服务端接收完毕，请求关闭", Value: int32(666)}})
+		}
 
+		if e != nil {
+			return e
+		}
+		log.Printf("stream.Recv pt.name:%v,  pt.value:%d", reqStream.Pt.Name, reqStream.Pt.Value)
+	}
 	return nil
 }
 
