@@ -24,7 +24,11 @@ func main() {
 	defer conn.Close()
 
 	client := pb.NewSearchServiceClient(conn)
-	resp, e := client.Search(context.Background(), &pb.SearchRequest{Request: "gRPC  testing"})
+
+	// 正常调用
+	ctx := context.Background()
+
+	resp, e := client.Search(ctx, &pb.SearchRequest{Request: "gRPC  testing"})
 	if e != nil {
 		log.Printf("client.Search err:%v", e.Error())
 	}
